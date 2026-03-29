@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>Chat App</h1>
+      <p class="app-subtitle">Right-click any assistant message to view LLM thinking</p>
+    </header>
+
+    <main class="chat-container" id="chatContainer">
+      <div class="messages-list" id="messagesList" role="log" aria-live="polite" aria-label="Chat messages">
+        <div class="welcome-message">
+          <p>Start a conversation below. Right-click on any assistant response to view the LLM's thinking process.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="input-area">
+      <form class="input-form" id="inputForm" autocomplete="off">
+        <textarea
+          id="messageInput"
+          class="message-input"
+          placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+          rows="1"
+          maxlength="4000"
+          aria-label="Message input"
+        ></textarea>
+        <button type="submit" class="send-button" id="sendButton" aria-label="Send message">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu" role="menu" aria-label="Message options">
+    <button class="context-menu-item" id="viewThinkingBtn" role="menuitem">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      View LLM Thinking
+    </button>
+    <button class="context-menu-item context-menu-item--copy" id="copyMessageBtn" role="menuitem">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      Copy Message
+    </button>
+  </div>
+
+  <!-- Thinking Popup Modal -->
+  <div class="modal-overlay" id="thinkingModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" class="modal-icon">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4M12 8h.01"/>
+          </svg>
+          <h2 class="modal-title" id="modalTitle">LLM Thinking Process</h2>
+        </div>
+        <button class="modal-close" id="modalClose" aria-label="Close thinking popup">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <h3 class="modal-section-title">Planning &amp; Reasoning</h3>
+          <div class="thinking-content" id="thinkingContent" aria-live="polite">
+            <p class="no-thinking">No thinking data available for this message.</p>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h3 class="modal-section-title">Response</h3>
+          <div class="response-preview" id="responsePreview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
