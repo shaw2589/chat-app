@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const OpenAI = require('openai');
+const rateLimit = require('express-rate-limit');
 const config = require('./config');
 
 const app = express();
@@ -29,6 +30,23 @@ function getOpenAIClient() {
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Rate limiters
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+const fileLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
 
 // Multer storage config
 const storage = multer.diskStorage({
@@ -121,7 +139,7 @@ app.delete('/api/conversations/:id', (req, res) => {
 });
 
 // Send a chat message
-app.post('/api/conversations/:id/chat', async (req, res) => {
+app.post('/api/conversations/:id/chat', chatLimiter, async (req, res) => {
   const conv = conversations[req.params.id];
   if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
@@ -208,7 +226,7 @@ app.get('/api/folders', (req, res) => {
 });
 
 // Create a folder
-app.post('/api/folders', (req, res) => {
+app.post('/api/folders', fileLimiter, (req, res) => {
   const { name } = req.body;
   if (!name || typeof name !== 'string' || name.trim() === '') {
     return res.status(400).json({ error: 'Folder name is required' });
@@ -222,7 +240,7 @@ app.post('/api/folders', (req, res) => {
 });
 
 // Delete a folder
-app.delete('/api/folders/:id', (req, res) => {
+app.delete('/api/folders/:id', fileLimiter, (req, res) => {
   const folder = folders[req.params.id];
   if (!folder) return res.status(404).json({ error: 'Folder not found' });
   const folderPath = path.join(uploadsDir, req.params.id);
@@ -234,7 +252,7 @@ app.delete('/api/folders/:id', (req, res) => {
 });
 
 // Upload a file to a folder
-app.post('/api/folders/:folderId/files', (req, res) => {
+app.post('/api/folders/:folderId/files', fileLimiter, (req, res) => {
   const folder = folders[req.params.folderId];
   if (!folder) return res.status(404).json({ error: 'Folder not found' });
 
@@ -265,7 +283,7 @@ app.post('/api/folders/:folderId/files', (req, res) => {
 });
 
 // Delete a file from a folder
-app.delete('/api/folders/:folderId/files/:fileId', (req, res) => {
+app.delete('/api/folders/:folderId/files/:fileId', fileLimiter, (req, res) => {
   const folder = folders[req.params.folderId];
   if (!folder) return res.status(404).json({ error: 'Folder not found' });
 
