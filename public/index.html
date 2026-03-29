@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- ── LEFT SIDEBAR ─────────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">💬 ChatAI</span>
+        <button class="icon-btn" id="toggleSidebar" title="Toggle sidebar">☰</button>
+      </div>
+
+      <button class="btn btn-primary new-chat-btn" id="newChatBtn">+ New Chat</button>
+
+      <nav class="conversation-list" id="conversationList">
+        <!-- populated by JS -->
+      </nav>
+
+      <!-- Folder section -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-header">
+          <span>📁 Folders</span>
+          <button class="icon-btn" id="newFolderBtn" title="New folder">+</button>
+        </div>
+        <ul class="folder-list" id="folderList">
+          <!-- populated by JS -->
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ──────────────────────────────────────────────── -->
+    <main class="main-content">
+      <!-- Top bar -->
+      <header class="topbar">
+        <button class="icon-btn sidebar-toggle-mobile" id="mobileSidebarToggle">☰</button>
+        <h1 class="topbar-title" id="chatTitle">Select or start a conversation</h1>
+        <div class="topbar-actions">
+          <!-- File attachment indicator -->
+          <button class="icon-btn attach-btn" id="attachBtn" title="Attach files from folder" style="display:none">
+            📎 <span class="attach-count" id="attachCount">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat messages -->
+      <div class="chat-area" id="chatArea">
+        <div class="chat-empty" id="chatEmpty">
+          <div class="chat-empty-icon">🤖</div>
+          <p>Start a new conversation or select an existing one.</p>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="input-bar" id="inputBar">
+        <!-- Attached files chips -->
+        <div class="attached-files" id="attachedFiles" style="display:none"></div>
+        <div class="input-row">
+          <textarea
+            id="messageInput"
+            placeholder="Type a message…"
+            rows="1"
+            disabled
+          ></textarea>
+          <button class="send-btn" id="sendBtn" disabled title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── NEW FOLDER MODAL ───────────────────────────────────────────── -->
+  <div class="modal-overlay" id="newFolderModal" style="display:none">
+    <div class="modal">
+      <h2>Create Folder</h2>
+      <label for="folderNameInput">Folder name</label>
+      <input type="text" id="folderNameInput" placeholder="e.g. Project Docs" maxlength="60" />
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelFolderBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmFolderBtn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOLDER FILES PANEL ─────────────────────────────────────────── -->
+  <div class="panel-overlay" id="folderPanel" style="display:none">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 id="panelFolderName">Folder</h2>
+        <button class="icon-btn" id="closePanelBtn">✕</button>
+      </div>
+      <div class="panel-info"><span id="fileCountLabel">0 / 10 files</span></div>
+
+      <ul class="file-list" id="fileList"></ul>
+
+      <div class="panel-upload">
+        <label class="btn btn-secondary upload-label" for="fileUploadInput">
+          ⬆ Upload File
+        </label>
+        <input type="file" id="fileUploadInput" style="display:none" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FILE SELECTOR MODAL ────────────────────────────────────────── -->
+  <div class="modal-overlay" id="fileSelectModal" style="display:none">
+    <div class="modal modal-wide">
+      <h2>Attach Files to Prompt</h2>
+      <p class="modal-subtitle">Select files to include as context in your message.</p>
+      <div id="fileSelectList" class="file-select-list"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelFileSelectBtn">Cancel</button>
+        <button class="btn btn-primary" id="confirmFileSelectBtn">Attach</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
