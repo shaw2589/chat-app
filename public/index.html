@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Marked.js for markdown rendering + DOMPurify for sanitization -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="app-logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>ChatApp</span>
+        </div>
+        <button class="icon-btn" id="newConvBtn" title="New conversation">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label">Conversations</div>
+        <ul class="conv-list" id="convList"></ul>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label-row">
+          <span class="section-label">Folders</span>
+          <button class="text-btn" id="newFolderBtn">+ New</button>
+        </div>
+        <ul class="folder-list" id="folderList"></ul>
+      </div>
+    </aside>
+
+    <!-- ── Mobile overlay ── -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- ── Main area ── -->
+    <main class="main-area">
+      <!-- Top bar -->
+      <header class="topbar">
+        <button class="icon-btn hamburger" id="hamburgerBtn" title="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div class="conv-title-area">
+          <span id="convTitle">Select or start a conversation</span>
+        </div>
+        <button class="icon-btn danger" id="deleteConvBtn" title="Delete conversation" style="display:none">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Chat messages -->
+      <div class="chat-container" id="chatContainer">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h2>Start a Conversation</h2>
+          <p>Click <strong>+</strong> in the sidebar to create a new conversation, or select an existing one.</p>
+        </div>
+        <div class="messages" id="messages"></div>
+      </div>
+
+      <!-- Context bar (selected folders) -->
+      <div class="context-bar" id="contextBar" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span id="contextBarText">No folders selected</span>
+        <button class="text-btn small" id="clearContextBtn">Clear</button>
+      </div>
+
+      <!-- Input area -->
+      <div class="input-area" id="inputArea" style="display:none">
+        <div class="folder-chip-row" id="folderChipRow"></div>
+        <div class="input-row">
+          <button class="icon-btn attach-btn" id="attachFolderBtn" title="Attach folder context">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+          <textarea
+            id="messageInput"
+            placeholder="Type your message…"
+            rows="1"
+            aria-label="Message input"
+          ></textarea>
+          <button class="send-btn" id="sendBtn" title="Send message" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Modals ── -->
+
+  <!-- New Folder Modal -->
+  <div class="modal-backdrop" id="newFolderModal" aria-modal="true" role="dialog" aria-label="New Folder">
+    <div class="modal">
+      <h3>New Folder</h3>
+      <input type="text" id="folderNameInput" placeholder="Folder name" maxlength="64" />
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelFolderBtn">Cancel</button>
+        <button class="btn primary" id="createFolderBtn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Folder Files Modal -->
+  <div class="modal-backdrop" id="folderModal" aria-modal="true" role="dialog" aria-label="Folder Files">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 id="folderModalTitle">Folder Files</h3>
+        <button class="icon-btn" id="closeFolderModalBtn" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="file-list-header">
+        <span id="fileCountLabel">0 / 10 files</span>
+        <label class="btn primary small upload-label" id="uploadLabel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          Upload File
+          <input type="file" id="fileUploadInput" style="display:none" accept=".txt,.md,.csv,.json,.html,.css,.js,.py,.ts,.yaml,.yml,.xml,.log" />
+        </label>
+      </div>
+      <ul class="file-list" id="modalFileList"></ul>
+    </div>
+  </div>
+
+  <!-- Folder Attach Modal -->
+  <div class="modal-backdrop" id="attachModal" aria-modal="true" role="dialog" aria-label="Attach Folders">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Attach Folder Context</h3>
+        <button class="icon-btn" id="closeAttachModalBtn" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <p class="modal-hint">Select folders to include their file contents as context in the next message.</p>
+      <ul class="folder-select-list" id="attachFolderList"></ul>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelAttachBtn">Cancel</button>
+        <button class="btn primary" id="confirmAttachBtn">Attach</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
